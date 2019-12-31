@@ -20,6 +20,7 @@ from jwcrypto.common import json_encode, json_decode
 AUTHORIZE_ENDPOINT='https://isb-test.op.fi/oauth/authorize'
 TOKEN_ENDPOINT='https://isb-test.op.fi/oauth/token'
 ISBKEY_ENDPOINT='https://isb-test.op.fi/jwks/broker'
+ISBEMBEDDED_ENDPOINT='https://isb-test.op.fi/api/embedded-ui/'
 #AUTHORIZE_ENDPOINT='https://identity-service-broker.docker/oauth/authorize'
 #TOKEN_ENDPOINT='https://identity-service-broker.docker/oauth/token'
 
@@ -82,7 +83,11 @@ api = responder.API()
 @api.route("/")
 def front_view(req, resp):
     """Front page"""
-    resp.html = api.template('start.html')
+    embeddedendpoint = ISBEMBEDDED_ENDPOINT + CLIENT_ID
+    embeddedhtml=requests.get(embeddedendpoint, verify=False).json()
+    print('embedded ui content ' + str(embeddedhtml))    
+    sys.stdout.flush()    
+    resp.html = api.template('start.html', embeddedhtml=embeddedhtml)
 
     
 @api.route("/authenticate")
@@ -136,42 +141,32 @@ async def return_view(req, resp):
         except KeyError:
             raise ValueError(token_data)
 
-        print('decrypting token')
+        #print('decrypting token')
 
         jwetoken = jwe.JWE()
         jwetoken.deserialize(id_token)
         jwetoken.decrypt(decryption_key)
 
-        print('token decrypted (kid): ' + str(jwetoken.jose_header['kid']))
+        #print('token decrypted (kid): ' + str(jwetoken.jose_header['kid']))
 
         jwstoken = jws.JWS()
         jwstoken.deserialize(jwetoken.payload.decode('ascii'))     
 
         sig_key = jwstoken.jose_header['kid']
-        print('Signing key = ' + str(sig_key))
+        #print('Signing key = ' + str(sig_key))
  
         keys=requests.get(ISBKEY_ENDPOINT, verify=False).json()
-        print('keys from ISB = ' + str(keys))
+        #print('keys from ISB = ' + str(keys))
 
         keyset=JWKSet()
         for key in keys['keys']:
             kid = key['kid']
-            print('key = ' + str(key))
             keyset.add(JWK(**key))
-            jsonstring=str(key).replace("'", "\"")
-            print('key again: ' + str(jsonstring))
             if kid==sig_key:
-                isb_cert=jwk.JWK.from_json(jsonstring)
-                print("kid used to verify signature " + kid)
+                isb_cert=JWK(**key)
 
-
-
-        print('verifying token')
         jwstoken.verify(isb_cert)
-        print('token verified')
-
         print(str(json_decode(jwstoken.payload)))  
-
         sys.stdout.flush()
 
         id_token = json_decode(jwstoken.payload)

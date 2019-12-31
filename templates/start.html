@@ -3,6 +3,16 @@
 {% block content %}
 <h3>Python Service Provider</h3>
 <p><a href="/authenticate">Log in</a></p>
+
+<table>
+    {% for key, value in embeddedhtml.items() %}
+    <tr>
+      <td>{{ key }}</td>
+      <td>{{ value }}</td>
+    </tr>
+    {% endfor %}
+  </table>
+
 {% endblock %}
 
 {% block log_in_again %}
