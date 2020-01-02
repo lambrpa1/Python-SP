@@ -75,11 +75,12 @@ class Session:
         return object.__getattribute__(self, key)
 
 
-#api = responder.API(static_dir="/static")
-api = responder.API()
+api = responder.API(static_dir="/app/static", static_route="/static")
+#api = responder.API()
 #api = responder.API(static_dir="/app/static", static_route="/app/static") 
 #api.add_route("/images/", static=True)
-api.add_route("/css/", static=True)
+api.add_route("/static/css", static=True)
+api.add_route("/static/images", static=True)
 #api = responder.API(enable_hsts=True)
 #api.serve(port=80,address="localhost", debug=True)
 
@@ -90,11 +91,25 @@ def front_view(req, resp):
     embedded=requests.get(embeddedendpoint, verify=False).json()
     idps=embedded["identityProviders"]
     dispurtance=embedded['disturbanceInfo']
-    print('embedded = ' + str(embedded))
+    #print('embedded = ' + str(embedded))
     sys.stdout.flush()   
    
-    resp.html = api.template('start.html', embedded=embedded, idps=idps, dispurtance=dispurtance)
-    
+    #resp.html = api.template('start.html', embedded=embedded, idps=idps, dispurtance=dispurtance)
+    resp.html = api.template('standard.html', embedded=embedded, idps=idps, dispurtance=dispurtance)
+
+@api.route("/embedded")
+def front_view(req, resp):
+    """Front page"""
+    embeddedendpoint = ISBEMBEDDED_ENDPOINT + CLIENT_ID
+    embedded=requests.get(embeddedendpoint, verify=False).json()
+    idps=embedded["identityProviders"]
+    dispurtance=embedded['disturbanceInfo']
+    #print('embedded = ' + str(embedded))
+    sys.stdout.flush()   
+   
+    #resp.html = api.template('start.html', embedded=embedded, idps=idps, dispurtance=dispurtance)
+    resp.html = api.template('embedded.html', embedded=embedded, idps=idps, dispurtance=dispurtance)
+
 @api.route("/authenticate")
 def jump_view(req, resp):
     """Jump view linked to from front page. Redirects to Identity Service Broker."""
