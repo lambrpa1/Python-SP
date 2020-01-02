@@ -15,6 +15,8 @@
 <h3>Python Service Provider!</h3>
 
 OP Identity Service Broker allows Service Providers (you) to implement strong electronic identification (Finnish bank credentials, Mobile ID) easily to websites and mobile apps via single API.
+<br>
+<br>
 This Demo Service Provider gives you three different examples how to integrate to the Identification Service Broker:
 <br>
 <br>
@@ -22,6 +24,14 @@ This Demo Service Provider gives you three different examples how to integrate t
 
 
 <form action="/authenticate" method="GET">
+    <input type="checkbox" id="promptBox" name="promptBox" value="consent">
+    <label for="promptBox">
+      Require consent
+      <br/>
+      <small>End-user is forced to review her personal data before returning to service.</small>
+    </label>
+    <br>
+    <br>    
     <button type="submit" class="id-button">AUTHENTICATE</button>
 </form>
 
@@ -38,6 +48,17 @@ The consent can be set in the request as well.
 <br>
 
 <form action="/authenticate" method="GET">
+
+    <input type="checkbox" id="promptBox" name="promptBox" value="consent">
+    <label for="promptBox">
+      Require consent
+      <br/>
+      <small>End-user is forced to review her personal data before returning to service.</small>
+    </label>
+
+    <br>
+    <br>
+
     <table> 
         <tr>
             <th colspan="10">

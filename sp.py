@@ -75,11 +75,11 @@ class Session:
         return object.__getattribute__(self, key)
 
 
-api = responder.API(static_dir="/static")
-#api = responder.API()
-#api = responder.API(static_dir="/app/static", static_route="/static") 
+#api = responder.API(static_dir="/static")
+api = responder.API()
+#api = responder.API(static_dir="/app/static", static_route="/app/static") 
 #api.add_route("/images/", static=True)
-#api.add_route("/css/", static=True)
+api.add_route("/css/", static=True)
 #api = responder.API(enable_hsts=True)
 #api.serve(port=80,address="localhost", debug=True)
 
@@ -100,19 +100,23 @@ def jump_view(req, resp):
     """Jump view linked to from front page. Redirects to Identity Service Broker."""
 
     idButton = req.params.get('idButton')
+    consent = req.params.get('promptBox')
 
-    print('IdButton = ' + str(idButton))
+    if (consent is None):
+        consent = 'no consent'
+
+    print('IdButton = ' + str(idButton) + ' and consent = ' + consent)
     sys.stdout.flush()
     
     if (idButton is not None):
-        session = Session(nonce=binascii.hexlify(os.urandom(10)).decode('ascii'),idButton=idButton)
+        session = Session(nonce=binascii.hexlify(os.urandom(10)).decode('ascii'),idButton=idButton, consent=consent)
         resp.html = api.template(
             'jump.html',
             endpoint=AUTHORIZE_ENDPOINT,
             request=make_auth_jwt_embedded(session)
             )
     else:
-        session = Session(nonce=binascii.hexlify(os.urandom(10)).decode('ascii'))
+        session = Session(nonce=binascii.hexlify(os.urandom(10)).decode('ascii'), consent=consent)
         resp.html = api.template(
             'jump.html',
             endpoint=AUTHORIZE_ENDPOINT,
@@ -215,19 +219,34 @@ def make_token_jwt():
 
 def make_auth_jwt(session):
 
-    payload = json_encode(dict(
+
+    params = dict(
         client_id=CLIENT_ID,
         redirect_uri='http://{0}/return'.format(HOSTNAME),
         nonce=session.nonce,
         state=session.sessionid,
         scope="openid profile personal_identity_code",
         response_type="code"
-        ))
+        )
+
+    if (session.consent=='consent'):
+        params = dict(
+        client_id=CLIENT_ID,
+        redirect_uri='http://{0}/return'.format(HOSTNAME),
+        nonce=session.nonce,
+        state=session.sessionid,
+        scope="openid profile personal_identity_code",
+        response_type="code",
+        prompt="consent"
+        )
+
+    payload = json_encode(params)
+
     return make_private_key_jwt(payload)
 
 def make_auth_jwt_embedded(session):
 
-    payload = json_encode(dict(
+    params = dict(
         client_id=CLIENT_ID,
         redirect_uri='http://{0}/return'.format(HOSTNAME),
         nonce=session.nonce,
@@ -235,7 +254,21 @@ def make_auth_jwt_embedded(session):
         scope="openid profile personal_identity_code",
         response_type="code",
         ftn_idp_id=session.idButton
-        ))
+        )
+
+    if (session.consent=='consent'):
+        params = dict(
+        client_id=CLIENT_ID,
+        redirect_uri='http://{0}/return'.format(HOSTNAME),
+        nonce=session.nonce,
+        state=session.sessionid,
+        scope="openid profile personal_identity_code",
+        response_type="code",
+        ftn_idp_id=session.idButton,
+        prompt="consent"
+        )
+
+    payload = json_encode(params)
     return make_private_key_jwt(payload)
 
 if __name__=='__main__':
