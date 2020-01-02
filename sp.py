@@ -75,33 +75,49 @@ class Session:
         return object.__getattribute__(self, key)
 
 
-api = responder.API()
+api = responder.API(static_dir="/static")
+#api = responder.API()
+#api = responder.API(static_dir="/app/static", static_route="/static") 
+#api.add_route("/images/", static=True)
+#api.add_route("/css/", static=True)
 #api = responder.API(enable_hsts=True)
 #api.serve(port=80,address="localhost", debug=True)
-
 
 @api.route("/")
 def front_view(req, resp):
     """Front page"""
     embeddedendpoint = ISBEMBEDDED_ENDPOINT + CLIENT_ID
-    embeddedhtml=requests.get(embeddedendpoint, verify=False).json()
-    print('embedded ui content ' + str(embeddedhtml))    
-    sys.stdout.flush()    
-    resp.html = api.template('start.html', embeddedhtml=embeddedhtml)
-
+    embedded=requests.get(embeddedendpoint, verify=False).json()
+    idps=embedded["identityProviders"]
+    dispurtance=embedded['disturbanceInfo']
+    print('embedded = ' + str(embedded))
+    sys.stdout.flush()   
+   
+    resp.html = api.template('start.html', embedded=embedded, idps=idps, dispurtance=dispurtance)
     
 @api.route("/authenticate")
 def jump_view(req, resp):
     """Jump view linked to from front page. Redirects to Identity Service Broker."""
 
-    session = Session(nonce=binascii.hexlify(os.urandom(10)).decode('ascii'))
-    resp.html = api.template(
-        'jump.html',
-        endpoint=AUTHORIZE_ENDPOINT,
-        request=make_auth_jwt(session)
-        )
-    #api.redirect(resp, url, status_code=307)
+    idButton = req.params.get('idButton')
 
+    print('IdButton = ' + str(idButton))
+    sys.stdout.flush()
+    
+    if (idButton is not None):
+        session = Session(nonce=binascii.hexlify(os.urandom(10)).decode('ascii'),idButton=idButton)
+        resp.html = api.template(
+            'jump.html',
+            endpoint=AUTHORIZE_ENDPOINT,
+            request=make_auth_jwt_embedded(session)
+            )
+    else:
+        session = Session(nonce=binascii.hexlify(os.urandom(10)).decode('ascii'))
+        resp.html = api.template(
+            'jump.html',
+            endpoint=AUTHORIZE_ENDPOINT,
+            request=make_auth_jwt(session)
+            )       
     
 @api.route("/return")
 async def return_view(req, resp):
@@ -198,6 +214,7 @@ def make_token_jwt():
 
 
 def make_auth_jwt(session):
+
     payload = json_encode(dict(
         client_id=CLIENT_ID,
         redirect_uri='http://{0}/return'.format(HOSTNAME),
@@ -208,6 +225,18 @@ def make_auth_jwt(session):
         ))
     return make_private_key_jwt(payload)
 
+def make_auth_jwt_embedded(session):
+
+    payload = json_encode(dict(
+        client_id=CLIENT_ID,
+        redirect_uri='http://{0}/return'.format(HOSTNAME),
+        nonce=session.nonce,
+        state=session.sessionid,
+        scope="openid profile personal_identity_code",
+        response_type="code",
+        ftn_idp_id=session.idButton
+        ))
+    return make_private_key_jwt(payload)
 
 if __name__=='__main__':
     api.run()

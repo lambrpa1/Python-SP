@@ -1,17 +1,70 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h3>Python Service Provider</h3>
-<p><a href="/authenticate">Log in</a></p>
 
-<table>
-    {% for key, value in embeddedhtml.items() %}
-    <tr>
-      <td>{{ key }}</td>
-      <td>{{ value }}</td>
-    </tr>
-    {% endfor %}
-  </table>
+<style>
+    table {
+    display: table;
+    border-collapse: separate;
+    border-spacing: 10px;
+    border: 1px solid black;
+    border-color: gray;
+    }
+</style>
+
+<h3>Python Service Provider!</h3>
+
+OP Identity Service Broker allows Service Providers (you) to implement strong electronic identification (Finnish bank credentials, Mobile ID) easily to websites and mobile apps via single API.
+This Demo Service Provider gives you three different examples how to integrate to the Identification Service Broker:
+<br>
+<br>
+
+
+
+<form action="/authenticate" method="GET">
+    <button type="submit" class="id-button">AUTHENTICATE</button>
+</form>
+
+<br>
+
+Alternatively you can embed the indentification UI into your service and render it as you like. 
+<br>
+The end-user is redirected straight from your UI to the selected Identity Provider (bank, Mobile ID) instead of OP's hosted UI.
+<br>
+After identifying herself the end-user is redirected back to the return_uri you specify in the authentication request. 
+<br>
+The consent can be set in the request as well.
+<br>
+<br>
+
+<form action="/authenticate" method="GET">
+    <table> 
+        <tr>
+            <th colspan="10">
+            {{ embedded['isbConsent'] }}
+            </th>
+        </tr>
+        <tr>
+        {% for idp in idps %}
+        <td>
+            <button type="submit" class="id-button" name="idButton" id="{{idp['ftn_idp_id']}}" value="{{idp['ftn_idp_id']}}">
+                <img src="{{idp['imageUrl']}}" alt="{{idp['name']}}" style="width:80px;height:80px;">
+            </button>
+        </td>
+        {% endfor %}   
+        </tr>    
+        <tr>
+            <th colspan="10">
+                {{ dispurtance['header'] }}
+            </th>
+        </tr>
+        <tr>
+            <th colspan="10">
+                {{ dispurtance['text'] }}
+            </th>
+        </tr>        
+    </table>   
+</form>
 
 {% endblock %}
 
