@@ -17,54 +17,48 @@
 </header>
 
 
-<form action="/authenticate" method="GET">
+<form action="/authenticate" method="GET" class="example">
 
     <h2>Self-hosted UI (buttons) embedded into your service</h2>
 
-    <table>
-      <tr>
-          <td width='60%'>
-              <div class="info">
+       <div class="row">
+            <div class="info">
                 <p>Alternatively you can embed the indentification UI into your service and render it as you like. The end-user is redirected straight from your UI to the selected Identity Provider (bank, Mobile ID) instead of OP&#x27;s hosted UI.</p>
                 <p>After identifying herself the end-user is redirected back to the return_uri you specify in the authentication request. The consent can be set in the request as well.</p>
-                <p><a href="https://github.com/op-developer/Identity-Service-Broker-API/blob/master/README.md" target="_blank">See the API docs for more information.</a></p>
-              </div>
-          </td>
-          <td width='40%'>
+                <p><a href="https://github.com/op-developer/Identity-Service-Broker-API/blob/master/README.md" target="_blank">See the API docs for more information.</a></p> 
+           </div>
+            <section class="params">
+              <h3>Parameters for the identification request:</h3>
+              <ul class="param-group">
+                <li>
+                  <input type="checkbox" id="promptBox" name="promptBox" value="consent">
+                  <label for="promptBox">
+                    Require consent
+                    <br/>
+                    <small>End-user is forced to review her personal data before returning to service.</small>
+                  </label>
+                </li>
+              </ul>
+              <ul class="param-group">
+                <li>
+                  <input type="radio" name="purpose" value="normal" id="idBasic" checked>
+                  <label for="idBasic">Basic identification</label>
+                </li>
+            
+                <li>
+                  <input type="radio" name="purpose" value="weak" id="idWeak">
+                  <label for="idWeak">New weak credentials</label>
+                </li>
+            
+                <li>
+                  <input type="radio" name="purpose" value="strong" id="idStrong">
+                  <label for="idStrong">New strong credentials</label>
+                </li>
+              </ul>
+            </section>
+        </div>
+ 
 
-              <section class="params">
-                  <h3>Parameters for the identification request:</h3>
-                  <ul class="param-group">
-                    
-                      <input type="checkbox" id="promptBox" name="promptBox" value="consent">
-                      <label for="promptBox">
-                        Require consent
-                        <br/>
-                        <small>End-user is forced to review her personal data before returning to service.</small>
-                      </label>
-                    
-                  </ul>
-                  <ul class="param-group">
-                    
-                      <input type="radio" name="purpose" value="normal" id="idBasic" checked>
-                      <label for="idBasic">Basic identification</label>
-                    
-                      <br>
-                    
-                      <input type="radio" name="purpose" value="weak" id="idWeak">
-                      <label for="idWeak">New weak credentials</label>
-                    
-                      <br>
-                    
-                      <input type="radio" name="purpose" value="strong" id="idStrong">
-                      <label for="idStrong">New strong credentials</label>
-                    
-                  </ul>
-                </section>
-
-          </td>
-      </tr>
-  </table>
 
   <div class="note">
     <p>Note that it’s mandatory to display the following texts in the UI even if you embed it into you service:</p>
