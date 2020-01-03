@@ -27,7 +27,8 @@ ISBEMBEDDED_ENDPOINT='https://isb-test.op.fi/api/embedded-ui/'
 
 CLIENT_ID='saippuakauppias'
 #CLIENT_ID='test'
-HOSTNAME='localhost'
+#HOSTNAME='localhost'
+HOSTNAME='localhost:5042'
 
 # Global sessions db (in-memory)
 sessions = dict()
@@ -79,7 +80,9 @@ class Session:
         return object.__getattribute__(self, key)
 
 
-api = responder.API(static_dir="/app/static", static_route="/static")
+#api = responder.API(static_dir="/app/static", static_route="/static")
+api = responder.API(static_dir="C:/Users/Lambropoulos/projects/Python-SP/static", static_route="/static")
+
 api.add_route("/static/css", static=True)
 api.add_route("/static/images", static=True)
 
