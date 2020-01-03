@@ -19,43 +19,51 @@
 <form action="/authenticate" method="GET">
 
     <h2>OP’s hosted identification UI</h2>
-    <div class="row">
-        <div class="info">
-            <p>OP Identity Service Broker allows Service Providers (you) to implement strong electronic identification (Finnish bank credentials, Mobile ID) easily to websites and mobile apps via single API.</p>
-            <p>This Demo Service Provider gives you three different examples how to integrate to the Identification Service Broker:</p>
-    <p><a href="#">See the API docs for more information.</a></p>
-        </div>
-        <section class="params">
-          <h3>Parameters for the identification request:</h3>
-          <ul class="param-group">
-            <li>
-              <input type="checkbox" id="promptBox" name="promptBox" value="consent">
-              <label for="promptBox">
-                Require consent
-                <br/>
-                <small>End-user is forced to review her personal data before returning to service.</small>
-              </label>
-            </li>
-          </ul>
-          <ul class="param-group">
-            <li>
-              <input type="radio" name="purpose" value="normal" id="idBasic" checked>
-              <label for="idBasic">Basic identification</label>
-            </li>
-        
-            <li>
-              <input type="radio" name="purpose" value="weak" id="idWeak">
-              <label for="idWeak">New weak credentials</label>
-            </li>
-        
-            <li>
-              <input type="radio" name="purpose" value="strong" id="idStrong">
-              <label for="idStrong">New strong credentials</label>
-            </li>
-          </ul>
-        </section>
-    </div>    
 
+    <table>
+        <tr>
+            <td width='60%'>
+                <div class="info">
+                    <p>OP Identity Service Broker allows Service Providers (you) to implement strong electronic identification (Finnish bank credentials, Mobile ID) easily to websites and mobile apps via single API.</p>
+                    <p>This Demo Service Provider gives you three different examples how to integrate to the Identification Service Broker:</p>
+            <p><a href="https://github.com/op-developer/Identity-Service-Broker-API/blob/master/README.md" target="_blank">See the API docs for more information.</a></p>
+                </div>
+            </td>
+            <td width='40%'>
+
+                <section class="params">
+                    <h3>Parameters for the identification request:</h3>
+                    <ul class="param-group">
+                      
+                        <input type="checkbox" id="promptBox" name="promptBox" value="consent">
+                        <label for="promptBox">
+                          Require consent
+                          <br/>
+                          <small>End-user is forced to review her personal data before returning to service.</small>
+                        </label>
+                      
+                    </ul>
+                    <ul class="param-group">
+                      
+                        <input type="radio" name="purpose" value="normal" id="idBasic" checked>
+                        <label for="idBasic">Basic identification</label>
+                      
+                        <br>
+                      
+                        <input type="radio" name="purpose" value="weak" id="idWeak">
+                        <label for="idWeak">New weak credentials</label>
+                      
+                        <br>
+                      
+                        <input type="radio" name="purpose" value="strong" id="idStrong">
+                        <label for="idStrong">New strong credentials</label>
+                      
+                    </ul>
+                  </section>
+
+            </td>
+        </tr>
+    </table>
     
     <h3 class="view-title">
         Example UI
@@ -65,7 +73,7 @@
     <div class="view">
         <div class="view-layout">
             <div class="view-main">
-                <button type="submit" class="button" value="Submit"> Identity Yourseld ></button>
+                <button type="submit" class="button" value="Submit"> Identify yourself </button>
             </div>
         </div>
     </div>

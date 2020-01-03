@@ -12,6 +12,7 @@ import requests
 import sys
 import time
 import uuid
+import datetime
 
 from jwcrypto.jwk import JWK, JWKSet
 from jwcrypto import jwk, jws, jwe
@@ -30,6 +31,9 @@ HOSTNAME='localhost'
 
 # Global sessions db (in-memory)
 sessions = dict()
+# This is a global variable used to display previously used landing page (standard or embedded)
+# must be put inside session
+#layout = ''
 
 # Keys
 #
@@ -76,39 +80,23 @@ class Session:
 
 
 api = responder.API(static_dir="/app/static", static_route="/static")
-#api = responder.API()
-#api = responder.API(static_dir="/app/static", static_route="/app/static") 
-#api.add_route("/images/", static=True)
 api.add_route("/static/css", static=True)
 api.add_route("/static/images", static=True)
-#api = responder.API(enable_hsts=True)
-#api.serve(port=80,address="localhost", debug=True)
 
 @api.route("/")
 def front_view(req, resp):
-    """Front page"""
-    embeddedendpoint = ISBEMBEDDED_ENDPOINT + CLIENT_ID
-    embedded=requests.get(embeddedendpoint, verify=False).json()
-    idps=embedded["identityProviders"]
-    dispurtance=embedded['disturbanceInfo']
-    #print('embedded = ' + str(embedded))
-    sys.stdout.flush()   
-   
-    #resp.html = api.template('start.html', embedded=embedded, idps=idps, dispurtance=dispurtance)
-    resp.html = api.template('standard.html', embedded=embedded, idps=idps, dispurtance=dispurtance)
+    """Front page"""   
+    resp.html = api.template('standard.html')
 
 @api.route("/embedded")
 def front_view(req, resp):
     """Front page"""
-    embeddedendpoint = ISBEMBEDDED_ENDPOINT + CLIENT_ID
+    embeddedendpoint = ISBEMBEDDED_ENDPOINT + CLIENT_ID + '?lang=en'
     embedded=requests.get(embeddedendpoint, verify=False).json()
     idps=embedded["identityProviders"]
-    dispurtance=embedded['disturbanceInfo']
-    #print('embedded = ' + str(embedded))
-    sys.stdout.flush()   
-   
-    #resp.html = api.template('start.html', embedded=embedded, idps=idps, dispurtance=dispurtance)
-    resp.html = api.template('embedded.html', embedded=embedded, idps=idps, dispurtance=dispurtance)
+    disturbance=embedded['disturbanceInfo']
+     
+    resp.html = api.template('embedded.html', embedded=embedded, idps=idps, disturbance=disturbance)
 
 @api.route("/authenticate")
 def jump_view(req, resp):
@@ -124,6 +112,9 @@ def jump_view(req, resp):
     sys.stdout.flush()
     
     if (idButton is not None):
+        #global layout
+        #layout = 'embedded'
+        sessions['layout']='embedded'
         session = Session(nonce=binascii.hexlify(os.urandom(10)).decode('ascii'),idButton=idButton, consent=consent)
         resp.html = api.template(
             'jump.html',
@@ -131,6 +122,8 @@ def jump_view(req, resp):
             request=make_auth_jwt_embedded(session)
             )
     else:
+        #layout = ''
+        sessions['layout']=''
         session = Session(nonce=binascii.hexlify(os.urandom(10)).decode('ascii'), consent=consent)
         resp.html = api.template(
             'jump.html',
@@ -145,13 +138,25 @@ async def return_view(req, resp):
     code = req.params.get('code')
     error = req.params.get('error')
     sessionid = req.params.get('state')
+    error_description = req.params.get('error_description')
+    
+    #global layout
+    #print('Layout = ' + layout)
+    #print('Layout = ' + sessions['layout'])
+
+    layout = sessions['layout']
 
     if not error and (not sessionid or sessionid not in sessions):
         error = 'Invalid session'
 
     if error:
-        resp.html = api.template('error.html', error=error)
-        return
+        if (error=='cancel'):
+            resp.html = api.template('cancel.html', error=error, layout=layout)
+            return
+        else:
+            resp.html = api.template('error.html', error=error, error_description=error_description, layout=layout)
+            return       
+
 
     # Resolve the access code
     async with aiohttp.ClientSession() as session:
@@ -205,7 +210,14 @@ async def return_view(req, resp):
         sys.stdout.flush()
 
         id_token = json_decode(jwstoken.payload)
-        resp.html = api.template('result.html', id_token=id_token)
+
+        date = datetime.datetime.now()
+        datestring = date.strftime("%c")
+        variables = repr(id_token)
+
+        sys.stdout.flush()
+
+        resp.html = api.template('result.html', variables=variables, id_token=id_token, layout=layout, datestring=datestring)
 
         
 def make_private_key_jwt(payload):
