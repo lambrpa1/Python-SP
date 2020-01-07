@@ -53,7 +53,9 @@ Hiekkalaatikkoympäristössä paluu URL:n tarkistusta ei ole. Tuotantoympärist�
 - ISBEMBEDDED_ENDPOINT='https://isb-test.op.fi/api/embedded-ui/'
 
 1) Hiekkalaatikko (sandbox) ympäristössä käytetään palveluntarjoajan puolella kiinteää avainparia. palveluntarjoaja allekirjoittaa tunnistuspyynnön omalla salaisella avaimella ja lähettää sen tunnistuksen välityspalvelulle (http uudelleenohjaus)
+
 HUOM! Tuotannossa tunnistuksen välityspalvelu hakee palveluntarjoajan jwks end pointista palveluntarjoajan julkisen avaimen ja varmentaa allekirjoituksen ja käy katsomassa kumppanirekisteristä sopimustiedot, näitä tarkistuksia ei tehdä hiekkalaatikossa (sandbox)  
+
 Tässä esimerkissä kohta @api.route("/authenticate")
 
 2) Embedded toiminnossa lähetetään ylimääräinen attribuutti ftn_idp_id = <välineen nimi>, jonka perusteella tunnistuksen välityspalvelu osaa automaattisesti ohjata käyttäjän valitulle tunnistusvälineelle. Ylimääräisellä attribuutilla prompt=consent kerrotaan tunnistuksen välityspalvelulle, että käyttäjä haluaa tarkistaa välitettävät tiedot
@@ -93,4 +95,4 @@ cd my-isb-test
 docker-compose up --build
 ```
 
-Kun kontti on saatu pystyyn sovelluksen saa auki selaimeen, http://localhost . 
+Kun kontti on saatu pystyyn sovelluksen saa auki selaimeen seuraavasti http://localhost. Jos käynnistät palvelun ilman dockeria, muista asettaa mahdollinen http -portti urlin perään esimerkiksi http://localhost:5042. 

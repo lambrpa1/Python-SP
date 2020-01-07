@@ -107,11 +107,12 @@ def jump_view(req, resp):
 
     idButton = req.params.get('idButton')
     consent = req.params.get('promptBox')
+    purpose = req.params.get('purpose')
 
     if (consent is None):
         consent = 'no consent'
 
-    print('IdButton = ' + str(idButton) + ' and consent = ' + consent)
+    print('IdButton = ' + str(idButton) + ' and consent = ' + consent + ' and purpose = ' + purpose)
     sys.stdout.flush()
     
     if (idButton is not None):
@@ -122,7 +123,7 @@ def jump_view(req, resp):
         resp.html = api.template(
             'jump.html',
             endpoint=AUTHORIZE_ENDPOINT,
-            request=make_auth_jwt_embedded(session)
+            request=make_auth_jwt_embedded(session, purpose)
             )
     else:
         #layout = ''
@@ -131,7 +132,7 @@ def jump_view(req, resp):
         resp.html = api.template(
             'jump.html',
             endpoint=AUTHORIZE_ENDPOINT,
-            request=make_auth_jwt(session)
+            request=make_auth_jwt(session, purpose)
             )       
     
 @api.route("/return")
@@ -247,15 +248,17 @@ def make_token_jwt():
     return make_private_key_jwt(payload)
 
 
-def make_auth_jwt(session):
+def make_auth_jwt(session, purpose):
 
+    if (purpose=='normal'):
+        purpose=''
 
     params = dict(
         client_id=CLIENT_ID,
         redirect_uri='http://{0}/return'.format(HOSTNAME),
         nonce=session.nonce,
         state=session.sessionid,
-        scope="openid profile personal_identity_code",
+        scope="openid profile personal_identity_code " + purpose,
         response_type="code"
         )
 
@@ -265,7 +268,7 @@ def make_auth_jwt(session):
         redirect_uri='http://{0}/return'.format(HOSTNAME),
         nonce=session.nonce,
         state=session.sessionid,
-        scope="openid profile personal_identity_code",
+        scope="openid profile personal_identity_code " + purpose,
         response_type="code",
         prompt="consent"
         )
@@ -274,14 +277,17 @@ def make_auth_jwt(session):
 
     return make_private_key_jwt(payload)
 
-def make_auth_jwt_embedded(session):
+def make_auth_jwt_embedded(session, purpose):
+
+    if (purpose=='normal'):
+        purpose=''
 
     params = dict(
         client_id=CLIENT_ID,
         redirect_uri='http://{0}/return'.format(HOSTNAME),
         nonce=session.nonce,
         state=session.sessionid,
-        scope="openid profile personal_identity_code",
+        scope="openid profile personal_identity_code " + purpose,
         response_type="code",
         ftn_idp_id=session.idButton
         )
@@ -292,7 +298,7 @@ def make_auth_jwt_embedded(session):
         redirect_uri='http://{0}/return'.format(HOSTNAME),
         nonce=session.nonce,
         state=session.sessionid,
-        scope="openid profile personal_identity_code",
+        scope="openid profile personal_identity_code " + purpose,
         response_type="code",
         ftn_idp_id=session.idButton,
         prompt="consent"
