@@ -83,9 +83,9 @@ Please note that this integration example demo application has the following ide
 - demo application information leakage. It is possible to get some details about the system by using malformed input parameters, or in certain case, by calling the same method again with the same information. Also errors expose details on purpose to help the integration work. In production there should be user input validations and errors should not expose details of the system.
 - nonce in ID Token is not checked against the one that was given in oauth/authorize
 
-## Usage
+## Käyttö
 
-On the host computer give the following commands:
+Sovelluksen saa helposti käyttöön linux -ympäristössä, jos Docker on asennettuna. Sovellus toimii myös Windows ympäristössä, tosin silloin pieniä modifikaatioita pitää tehdä, katso sp.py -ohjelman responder -API alustus, sinne pitää määritellä staattinen hakemisto (Windows -hakemisto).
 
 ```bash
 git clone <repo-url> my-isb-test
@@ -93,4 +93,4 @@ cd my-isb-test
 docker-compose up --build
 ```
 
-When the container is up and running, please open the browser and go to the http://localhost . You can move between the three different UI examples following links in the UI.
+Kun kontti on saatu pystyyn sovelluksen saa auki selaimeen, http://localhost . 
