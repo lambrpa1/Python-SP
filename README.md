@@ -46,11 +46,11 @@ Hiekkalaatikkoympäristössä paluu URL:n tarkistusta ei ole. Tuotantoympärist�
 
 ## Tunnistuksen toteutuksesta
 
-Hiekkalaatikko (sandbox) ympäristön endpointit
-AUTHORIZE_ENDPOINT='https://isb-test.op.fi/oauth/authorize'
-TOKEN_ENDPOINT='https://isb-test.op.fi/oauth/token'
-ISBKEY_ENDPOINT='https://isb-test.op.fi/jwks/broker'
-ISBEMBEDDED_ENDPOINT='https://isb-test.op.fi/api/embedded-ui/'
+- Hiekkalaatikko (sandbox) ympäristön endpointit
+- AUTHORIZE_ENDPOINT='https://isb-test.op.fi/oauth/authorize'
+- TOKEN_ENDPOINT='https://isb-test.op.fi/oauth/token'
+- ISBKEY_ENDPOINT='https://isb-test.op.fi/jwks/broker'
+- ISBEMBEDDED_ENDPOINT='https://isb-test.op.fi/api/embedded-ui/'
 
 1) Hiekkalaatikko (sandbox) ympäristössä käytetään palveluntarjoajan puolella kiinteää avainparia. palveluntarjoaja allekirjoittaa tunnistuspyynnön omalla salaisella avaimella ja lähettää sen tunnistuksen välityspalvelulle (http uudelleenohjaus)
 HUOM! Tuotannossa tunnistuksen välityspalvelu hakee palveluntarjoajan jwks end pointista palveluntarjoajan julkisen avaimen ja varmentaa allekirjoituksen ja käy katsomassa kumppanirekisteristä sopimustiedot, näitä tarkistuksia ei tehdä hiekkalaatikossa (sandbox)  
