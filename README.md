@@ -1,38 +1,32 @@
-# Service Provider integration example for the OP Identity Service Broker
+# Palveluntarjoajan integraatioesimerkki OP:n tunnistuksen välityspalveluun
 
-This repository provides an easy way to test OP identification
-services. It also serves as a PHP-based implementation example to help Servide Providers (SP) to integrate to the OP Identitity Service Broker (ISB).
+Tämä esimerkkiprojekti tarjoaa helpon tavan testata OP:n tunnistuksen välityspalvelua. Esimerkki sisältää integroitumiskoodit, jotka on kirjoitettu Python -kielellä, ja esittelee seikkaperäisesti asiat, jotka palveluntarjoajan on toteutettava omaan palveluun, jotta hän voi integroitua tunnistuksen välityspalveluun. Esimerkki on tarkoitettu palveluntarjoajille, joiden sovellus on rakennettu Pythonilla, ja koodi on helposti upotettavissa osaksi palveluntarjoajan sovellusta.
 
-This example is the OP Demo Service Provider, which runs in a Docker container and it connects with the OP ISB sandbox environment.
+Tämä esimerkki on integraatioesimerkki OP:n hiekkalaatikkoympäristöön. Hiekkalaatikko- ja tuotantoympäristön välillä on joitakin eroja, jotka palveluntarjoajan on huomioitava, jotta sovellus toimii myös tuotantoympäristössä.
 
-This Demo Service Provider gives you three different examples how to integrate to the OP's Identity Service Broker:
-- OP's hosted Identification UI
-- Embedded identification UI with buttons
-- Embedded identification UI with dropdown
+Tämän esimerkin avulla palveluntarjoaja voi tarjota tunnistuspalvelun
 
-## OP's hosted Identification UI
+- OP:n tunnistusseinällä
+- Omille sivuille lisätyillä tunnistusnapeilla
 
-In this example the Identification UI is hosted by the OP's Identity Service Broker. Authorization is started by clicking the "Identify Yourself" - button shown on the UI.
+## OP:n tunnistusseinä
 
-## Embedded identification UI with buttons
+Tässä esimerkissä tunnistusseinän tarjoaa OP:n tunnistuksen välityspalvelu. Tunnistautuminen aloitetaan palveluntarjoajan sivuilta ”Identity yourself” -nappulasta. Tämän jälkeen tunnistautuja ohjataan OP:n tunnistuksen välityspalvelun tarjoamalle tunnistusseinälle. Sieltä tunnistautuja valitsee halutun tunnistusvälineen ja jatkaa tunnistautumiseen.
 
-In this example the Identification UI is embedded into the Demo Service Provider. Authorization request is sent by clicking one of the Identity Provider buttons shown on the UI.
+## Sulautetut tunnistusnapit palveluntarjoajan omilla sivuilla
 
-## Embedded identification UI with dropdown
+Tässä esimerkissä asiakkaan valitsemat tunnistusmenetelmät näkyvät sulautettuina nappeina palveluntarjoajan sivuilla. Tunnistautuminen suoritetaan valitsemalla palveluntarjoajan sivulta haluttu tunnistusmenetelmä, jonka jälkeen tunnistautuja ohjataan tunnistuksen välityspalvelun kautta suoraan valittuun tunnistuspalveluun ja tunnistautuja voi aloittaa tunnistautumisen.
 
-In this example the Identification UI is embedded into the Demo Service Provider. Authorization request is sent by by choosing an Identity Provider from the dropdown menu shown on the UI.
+## Lisäparametrit testausta varten
 
-## Additional parameters for testing purposes
+Tämä esimerkki tarjoaa myös lisäparametrit testaustarkoituksia varten
 
-In all three examples it is possible to select the identification purpose (See the scope-parameter in the flow chapter of the API-document):
-- normal
-- weak (for weak identifiers, for example user account with user-id and password)
-- strong (for official strong authentication)
+- "Require concent": Tunnistautujalle näytetään palvelulle välitettävät tiedot ennen kuin ne välitetään eteenpäin. Tunnistautuja voi peruuttaa halutessaan tunnistustapahtuman
+- "Identification / normal": Tämä on normaali tunnistus
+- "Identification / weak": Pyydetään tunnistuksen välityspalvelua luomaan palveluntarjoajalle heikot tunnukset 
+- "Identification / strong": Pyydetään tunnistuksen välityspalvelua luomaan palveluntarjoajalle vahvat tunnukset
 
 In your implementation there won't be such selection for the end users. The purpose selection is there to illustrate how it looks like at the code level and in the interface between the SP and the ISB when the SP is using such purpose. SP needs to use one of these three methods when initiating the identification process with the ISB.
-
-In all three examples it is also possible to select whether consent is required or not (See the consent-parameter in the flow chapter of the API-document). In your implementation there won't be such selection for the end users. The consent parameter is there to illustrate how it looks like in the code level, in the ISB UI and in the interface between the SP and the ISB when the SP is requesting consent to be requested from the end users during the identification process. It is up to the SP to decide during the implementation phase whether to request this consent or not.
-
 
 Screenshot for the Service Provider example:
 
@@ -42,10 +36,34 @@ Identification done:
 
 ![Screenshot2](images/screenshot2.png)
 
+## Hiekkalaatikko- ja tuotantoympäristön erot
 
-## Requirements
-- Docker and Docker Compose need to be installed on the host computer. See https://www.docker.com/get-docker
-- Port 80 needs to be free on the host computer
+Hiekkalaatikkoympäristössä käytetään kiinteitä SP:n avaimia (avainpari allekirjoitukseen ja salaukseen). Tuotantoympäristössä palveluntarjoajan on itse huolehdittava avaimien luomisesta ja julkaistava julkiset avaimet tunnistuksen välityspalvelulle JWSK -endpointissa.
+
+Hiekkalaatikkoympäristössä näytetään kaikki tunnistusmenetelmät. Tuotantoympäristössä näytetään vain ne tunnistusmenetelmät, jotka asiakas on sopinut OP:n kanssa. 
+
+Hiekkalaatikkoympäristössä paluu URL:n tarkistusta ei ole. Tuotantoympäristössä paluu URL:n on oltava sopimuksen mukainen, muutoin tunnistustapahtuma epäonnistuu.
+
+## Tunnistuksen toteutuksesta
+
+Hiekkalaatikko (sandbox) ympäristön endpointit
+AUTHORIZE_ENDPOINT='https://isb-test.op.fi/oauth/authorize'
+TOKEN_ENDPOINT='https://isb-test.op.fi/oauth/token'
+ISBKEY_ENDPOINT='https://isb-test.op.fi/jwks/broker'
+ISBEMBEDDED_ENDPOINT='https://isb-test.op.fi/api/embedded-ui/'
+
+1) Hiekkalaatikko (sandbox) ympäristössä käytetään palveluntarjoajan puolella kiinteää avainparia. palveluntarjoaja allekirjoittaa tunnistuspyynnön omalla salaisella avaimella ja lähettää sen tunnistuksen välityspalvelulle (http uudelleenohjaus)
+HUOM! Tuotannossa tunnistuksen välityspalvelu hakee palveluntarjoajan jwks end pointista palveluntarjoajan julkisen avaimen ja varmentaa allekirjoituksen ja käy katsomassa kumppanirekisteristä sopimustiedot, näitä tarkistuksia ei tehdä hiekkalaatikossa (sandbox)  
+Tässä esimerkissä kohta @api.route("/authenticate")
+
+2) Embedded toiminnossa lähetetään ylimääräinen attribuutti ftn_idp_id = <välineen nimi>, jonka perusteella tunnistuksen välityspalvelu osaa automaattisesti ohjata käyttäjän valitulle tunnistusvälineelle. Ylimääräisellä attribuutilla prompt=consent kerrotaan tunnistuksen välityspalvelulle, että käyttäjä haluaa tarkistaa välitettävät tiedot
+
+3) Tunnistuksen jälkeen tunnistuksen välityspalvelu tuottaa autentikaatiotokenin, allekirjoittaa sen omalla salaisella avaimella ja salaa sen palveluntarjoajan julkisella avaimella (katso kohta HUOM! hiekkalaatikossa kiinteät avaimet) ja lähettää tokenin palveluntarjoajalle (http uudelleenohjaus)
+Tässä esimerkissä kohta @api.route("/return")
+
+4) Palveluntarjoaja hakee välityspalvelun jwsk -rajapinnasta välityspalvelun julkiset avaimet, tokenin otsikkotiedoista (header) allekirjoitukseen käytetyn välityspalvelun avaimen, purkaa omalla salaisella avaimella salauksen ja lopuksi tarkistaa allekirjoituksen välityspalvelun julkisella avaimella. 
+
+Huom: käytetty allekirjoitusavain on tarkistettava, koska avaimia voi olla avainrotaation takia useita.
 
 ## Documentation
 
