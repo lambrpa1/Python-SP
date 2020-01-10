@@ -64,7 +64,12 @@ Sandbox environment endpoints
 
 # About this implementation - landing page and authentcation flow
 
-In this example there is two landing pages, one for OP's hosted UI and another one for Embedded identification UI. There is links between those landing pages inside landing page. 
+In this example there is two landing pages 
+
+- OP's hosted UI (@api.route("/"))
+- Embedded identification UI (@api.route("/embedded"))
+
+There is links between those landing pages inside landing page. 
 
 Session management is done in-memory and a real session store must be used for real use.
 
