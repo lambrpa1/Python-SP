@@ -10,7 +10,6 @@ This example is the OP Demo Service Provider, which runs in a Docker container a
 This Demo Service Provider gives you three different examples how to integrate to the OP's Identity Service Broker:
 - OP's hosted Identification UI
 - Embedded identification UI with buttons
-- Embedded identification UI with dropdown
 
 ## OP's hosted Identification UI
 
@@ -19,10 +18,6 @@ In this example the Identification UI is hosted by the OP's Identity Service Bro
 ## Embedded identification UI with buttons
 
 In this example the Identification UI is embedded into the Demo Service Provider. Authorization request is sent by clicking one of the Identity Provider buttons shown on the UI.
-
-## Embedded identification UI with dropdown
-
-In this example the Identification UI is embedded into the Demo Service Provider. Authorization request is sent by by choosing an Identity Provider from the dropdown menu shown on the UI.
 
 ## Additional parameters for testing purposes
 
@@ -35,7 +30,6 @@ In your implementation there won't be such selection for the end users. The purp
 
 In all three examples it is also possible to select whether consent is required or not (See the consent-parameter in the flow chapter of the API-document). In your implementation there won't be such selection for the end users. The consent parameter is there to illustrate how it looks like in the code level, in the ISB UI and in the interface between the SP and the ISB when the SP is requesting consent to be requested from the end users during the identification process. It is up to the SP to decide during the implementation phase whether to request this consent or not.
 
-
 Screenshot for the Service Provider example:
 
 ![Screenshot1](images/screenshot1.png)
@@ -43,7 +37,6 @@ Screenshot for the Service Provider example:
 Identification done:
 
 ![Screenshot2](images/screenshot2.png)
-
 
 ## Differences between the sandbox and the production environment
 
@@ -53,7 +46,15 @@ In the sandbox environment, all autentication methods are displayed. Only the au
 
 There is no return URL check in the sandbox environment. In a production environment, the return URL must be in agreement, otherwise the authentication transaction will fail.
 
-## Tunnistuksen toteutuksesta
+## About this implementation - client id, libraries and ISB settings
+
+This test code uses client_id 'saippuakauppias'. 
+
+Python libraries used: aiohttp, base64, binascii, jwcrypto, os, responder, requests, sys, time, uuid, datetime
+
+Keys are stored at files:
+- Sandbox-SP-key.pem: Service Provider private key for encryption
+- sp-signing-key.pem: Service Provider private key for signing 
 
 Sandbox environment endpoints
 - AUTHORIZE_ENDPOINT='https://isb-test.op.fi/oauth/authorize'
@@ -61,21 +62,45 @@ Sandbox environment endpoints
 - ISBKEY_ENDPOINT='https://isb-test.op.fi/jwks/broker'
 - ISBEMBEDDED_ENDPOINT='https://isb-test.op.fi/api/embedded-ui/'
 
-1) The sandbox environment uses a fixed key pair on the service provider side. The service provider signs the authentication request with its own private key and sends it to the identity service broker (http redirect)
+# About this implementation - landing page and authentcation flow
 
-NOTE! In production, the identity service broker retrieves the service provider's public key from the provider's jwks end point and verifies the signature and visits the partner registry for the contract information, these checks are not done in the sandbox.  
+In this example there is two landing pages, one for OP's hosted UI and another one for Embedded identification UI. There is links between those landing pages inside landing page. 
 
-In this example, point @api.route("/authenticate")
+1) Authentication starts from landing page. It can be initiated by selection of "Identity Yourself" button (OP's hosted UI), or by selection of some Identity Provider logo button (Embedded identification UI) 
 
-2) The embedded function sends an extra attribute ftn_idp_id = <idp-name>, which allows the identity service broker to automatically redirect the user to the selected identity provider. The extra attribute prompt = consent tells the identity service broker that the user wants to check the information being passed
+Please see code at point @api.route("/authenticate")
 
-3) After authentication, the identity service broker generates an authentication token, signs it with its own private key and encrypts it with the ISP's public key (see NOTE in the sandbox for fixed keys) and sends the token to the ISP (http redirect). In this example, point @api.route("/return")
+Before doing anything parameters is fetched from GUI. 
 
-4) The service provider retrieves the ISB public keys from the proxy jwsk interface, the ISB key used for signature from the header of the token, decrypts with its own private key and finally verifies the signature with the public key of the ISB.
+- idButton describes the Identity Provider used to authenticate the user. It exist only in embedded mode and must be inlucded to authentication request. Extra attribute ftn_idp_id = <idButton>, which allows the identity service broker to automatically redirect the user to the selected identity provider.
+
+- concent means that after the successfully authentication user can verify the data to be sent to service provider before continute transaction. The extra attribute prompt = consent tells the identity service broker that the user wants to check the information being passed 
+
+- purpose means that is authentication 'normal', 'weak' or 'strong'
+
+After paramers fetched authentication token is created and signed using service provider secret key. And user will be forwarded to ISB authorize endpoint (http redirect)
+
+2) After authentication, the identity service broker generates an authentication token, signs it with its own private key and encrypts it with the ISP's public key (see NOTE in the sandbox for fixed keys) and sends the token to the ISP (http redirect). 
+
+Please see code at point @api.route("/return")
+
+- In this example first all parameters are fetched
+    - If there is an error in identification, reason for error will be checked
+        - 'cancel': User will redirected back to main authentication page
+        - Otherwise error and its description will be shown for the user
+
+- Token is fetched from html 
+- Token is decoded (Base64)
+- Token is deserialized and decrypted using service provider private key
+- Signature key id is obtained from header attributes
+- ISB public keys is obtained fromn ISB JWKS endpoint
+- Key used to sign the token is obtained and signature is verified 
+- Results are shown for the user
 
 Note: The signature key used must be checked because there may be multiple keys due to key rotation.
 
 ## Requirements
+
 - Docker and Docker Compose need to be installed on the host computer. See https://www.docker.com/get-docker
 - Port 80 needs to be free on the host computer
 
