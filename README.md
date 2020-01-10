@@ -66,6 +66,8 @@ Sandbox environment endpoints
 
 In this example there is two landing pages, one for OP's hosted UI and another one for Embedded identification UI. There is links between those landing pages inside landing page. 
 
+Session management is done in-memory and a real session store must be used for real use.
+
 1) Authentication starts from landing page. It can be initiated by selection of "Identity Yourself" button (OP's hosted UI), or by selection of some Identity Provider logo button (Embedded identification UI) 
 
 Please see code at point @api.route("/authenticate")
