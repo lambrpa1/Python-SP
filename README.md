@@ -87,6 +87,8 @@ Before doing anything parameters is fetched from GUI.
 
 After paramers fetched authentication token is created and signed using service provider secret key. And user will be forwarded to ISB authorize endpoint (http redirect)
 
+NOTE: JWS token header must contain kid (key id) used to sign request token.
+
 2) After authentication, the identity service broker generates an authentication token, signs it with its own private key and encrypts it with the ISP's public key (see NOTE in the sandbox for fixed keys) and sends the token to the ISP (http redirect). 
 
 Please see code at point @api.route("/return")
@@ -100,9 +102,9 @@ Please see code at point @api.route("/return")
 - Token is decoded (Base64)
 - Token is deserialized and decrypted using service provider private key
 - Signature key id is obtained from header attributes
-- ISB public keys is obtained fromn ISB JWKS endpoint
-- Key used to sign the token is obtained and signature is verified 
-- Results are shown for the user
+- ISB public keys are obtained from ISB JWKS endpoint
+- Signature is verified 
+- Identification data is shown for the user
 
 Note: The signature key used must be checked because there may be multiple keys due to key rotation.
 
