@@ -64,7 +64,12 @@ Sandbox environment endpoints
 
 # About this implementation - landing page and authentcation flow
 
-In this example there is two landing pages, one for OP's hosted UI and another one for Embedded identification UI. There is links between those landing pages inside landing page. 
+In this example there is two landing pages 
+
+- OP's hosted UI (@api.route("/"))
+- Embedded identification UI (@api.route("/embedded"))
+
+There is links between those landing pages inside landing page. 
 
 1) Authentication starts from landing page. It can be initiated by selection of "Identity Yourself" button (OP's hosted UI), or by selection of some Identity Provider logo button (Embedded identification UI) 
 
